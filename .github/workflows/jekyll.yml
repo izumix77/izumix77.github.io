@@ -1,20 +1,21 @@
+# .github/workflows/jekyll.yml
+
 name: Build and Deploy Jekyll Site
 
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: read          # コードチェックアウト用
+  pages: write            # GitHub Pages デプロイ用
+  id-token: write         # 認証用 (configure-pages で必要)
 
 on:
   push:
     branches: [ master ]
 
 jobs:
-  jekyll:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Ruby
@@ -22,18 +23,25 @@ jobs:
         with:
           ruby-version: '3.1'
 
-      - name: Install Bundler
-        run: gem install bundler
-
-      - name: Install dependencies
-        run: bundle install
+      - name: Install bundler and dependencies
+        run: |
+          gem install bundler
+          bundle install
 
       - name: Build site with Jekyll
         run: bundle exec jekyll build
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload _site artifact
+        uses: actions/upload-pages-artifact@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: master       # ← ここを追加！
-          publish_dir: ./_site
+          path: ./_site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v3
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v1
