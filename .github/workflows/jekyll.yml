@@ -17,7 +17,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.1'
+          ruby-version: '3.2' # 3.1から3.2に変更
           bundler-cache: true # 依存関係のキャッシュを有効化
       - name: Build Jekyll site
         run: bundle exec jekyll build
